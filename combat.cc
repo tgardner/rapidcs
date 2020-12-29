@@ -52,7 +52,7 @@ int RNG::getRandom(int a, int b)
 	if (a == b) return a;
 	//int randnum = rand() % 10000;
 	int randnum = this->_sr.RandomNumber(10000);
-	float zahl = a + (randnum / 10000.0) * (b - a);
+	float zahl = a + (randnum / 10000.0f) * (b - a);
 
 	int c = (int)zahl;
 	float d = zahl - c;
@@ -216,10 +216,10 @@ void CombatSys::battle()
 				{
 					T_UNIT unit = {
 										false,
-										this->_SHIPS[j].shield * (1 + (float)(this->_PLAYERS[T_ATTACKER][i].techShield / 10.0f)),
-										this->_SHIPS[j].shield * (1 + (float)(this->_PLAYERS[T_ATTACKER][i].techShield / 10.0f)),
-										this->_SHIPS[j].hull * (1 + (float)(this->_PLAYERS[T_ATTACKER][i].techArmor / 10.0f)),
-										this->_SHIPS[j].hull * (1 + (float)(this->_PLAYERS[T_ATTACKER][i].techArmor / 10.0f)),
+										int(lroundf(this->_SHIPS[j].shield * (1 + (float)(this->_PLAYERS[T_ATTACKER][i].techShield / 10.0f)))),
+										int(lroundf(this->_SHIPS[j].shield * (1 + (float)(this->_PLAYERS[T_ATTACKER][i].techShield / 10.0f)))),
+										int(lroundf(this->_SHIPS[j].hull * (1 + (float)(this->_PLAYERS[T_ATTACKER][i].techArmor / 10.0f)))),
+										int(lroundf(this->_SHIPS[j].hull * (1 + (float)(this->_PLAYERS[T_ATTACKER][i].techArmor / 10.0f)))),
 										&this->_SHIPS[j],
 										&this->_PLAYERS[T_ATTACKER][i]
 					};
@@ -242,10 +242,10 @@ void CombatSys::battle()
 				{
 					T_UNIT unit = {
 										false,
-										this->_SHIPS[j].shield * (1 + (float)(this->_PLAYERS[T_DEFENDER][i].techShield / 10.0f)),
-										this->_SHIPS[j].shield * (1 + (float)(this->_PLAYERS[T_DEFENDER][i].techShield / 10.0f)),
-										this->_SHIPS[j].hull * (1 + (float)(this->_PLAYERS[T_DEFENDER][i].techArmor / 10.0f)),
-										this->_SHIPS[j].hull * (1 + (float)(this->_PLAYERS[T_DEFENDER][i].techArmor / 10.0f)),
+										int(lroundf(this->_SHIPS[j].shield * (1 + (float)(this->_PLAYERS[T_DEFENDER][i].techShield / 10.0f)))),
+										int(lroundf(this->_SHIPS[j].shield * (1 + (float)(this->_PLAYERS[T_DEFENDER][i].techShield / 10.0f)))),
+										int(lroundf(this->_SHIPS[j].hull * (1 + (float)(this->_PLAYERS[T_DEFENDER][i].techArmor / 10.0f)))),
+										int(lroundf(this->_SHIPS[j].hull * (1 + (float)(this->_PLAYERS[T_DEFENDER][i].techArmor / 10.0f)))),
 										&this->_SHIPS[j],
 										&this->_PLAYERS[T_DEFENDER][i]
 					};
@@ -474,20 +474,20 @@ void CombatSys::Shoot(T_UNIT* source, T_UNIT* target, long* attackpower, long* a
 
 	float		dmgPrcnt;
 
-	attack = source->original->attack * (1 + (float)(source->owner->techWeapon / 10.0f));
+	attack = lroundf(source->original->attack * (1 + (float)(source->owner->techWeapon / 10.0f)));
 	shields = target->shieldLeft;
 	hull = target->hullLeft;
 
 	*attackpower += attack;
 	//lets try it speedsim like
-	double Dam = (double)attack;
-	double Dam2 = Dam;
+	float Dam = (float)attack;
+	float Dam2 = Dam;
 
-	double maxShield = (double)(target->shieldMax);
+	float maxShield = (float)(target->shieldMax);
 	if (Dam < target->shieldLeft)
 	{
 		// round damage down to full percents
-		double perc = floor(100.0f * Dam / maxShield);
+		float perc = floor(100.0f * Dam / maxShield);
 		Dam = maxShield * perc;
 		Dam /= 100.0f;
 
@@ -497,7 +497,7 @@ void CombatSys::Shoot(T_UNIT* source, T_UNIT* target, long* attackpower, long* a
 	{
 		// reduce shield by damage
 		Dam -= target->shieldLeft;
-		target->shieldLeft -= Dam2;
+		target->shieldLeft -= int(lroundf(Dam2));
 		if (Dam < 0)
 			Dam = 0;
 	}
@@ -505,43 +505,18 @@ void CombatSys::Shoot(T_UNIT* source, T_UNIT* target, long* attackpower, long* a
 	{
 		Dam = 0;
 	}
-	*absorbed += (attack - Dam);
+	*absorbed += lroundf(attack - Dam);
 
 	if (target->shieldLeft < 0)
 		target->shieldLeft = 0;
 	if (Dam > 0)
 	{
 		// if damage left, destroy hull
-		target->hullLeft -= Dam;
+		target->hullLeft -= int(lroundf(Dam));
 		if (target->hullLeft < 0)
 			target->hullLeft = 0;
 	}
-	/*
-	//the 1%-rule
-	if(target->shieldLeft == 0 || (float)(attack / (float)(target->shieldMax) > 0.01))
-	{
 
-		//first the shields
-		if(attack < shields)
-		{
-			//we didn't even touch the hull
-			target->shieldLeft -= attack;
-			*absorbed += attack;
-		}
-		else
-		{
-			attack -= target->shieldLeft;
-
-			*absorbed += target->shieldLeft;
-			target->shieldLeft = 0; //shieldsbroken
-
-
-			target->hullLeft -= attack;
-
-
-		}
-	}
-	*/
 	dmgPrcnt = (float)((1 - target->hullLeft / (float)(target->hullMax))) * 100;
 	if (dmgPrcnt > 30)
 	{
@@ -601,7 +576,7 @@ char* CombatSys::getResult()
 	for (int round = 0; round < this->roundCount; round++)
 	{
 		strcat(txt, "	{\n");
-		sprintf(tmp, "		\"ashot\":%i,\n		\"adamage\":%i,\n		\"aabsorbed\":%i,\n		\"dshot\":%i,\n		\"ddamage\":%i,\n		\"dabsorbed\":%i,\n		"
+		sprintf(tmp, "		\"ashot\":%li,\n		\"adamage\":%li,\n		\"aabsorbed\":%li,\n		\"dshot\":%li,\n		\"ddamage\":%li,\n		\"dabsorbed\":%li,\n		"
 			, this->_ROUNDS[round].attackShots
 			, this->_ROUNDS[round].attackDamage
 			, this->_ROUNDS[round].attackAbsorbed
