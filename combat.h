@@ -1,36 +1,37 @@
+#include "speedrand.h"
 
 const unsigned T_ATTACKER = 0;
 const unsigned T_DEFENDER = 1;
 const unsigned MAX_SLOTS = 100;
 
 struct T_SHIP {
-    int id;
+	int id;
 	long attack;
 	long hull;
 	long shield;
-	int *rapidfire;
+	int* rapidfire;
 };
 
- struct T_PLAYER {
+struct T_PLAYER {
 	int playerId;
 	int techWeapon;
 	int techShield;
 	int techArmor;
-	int *shipList;
+	int* shipList;
 };
 
 class T_UNIT {
-	public:
+public:
 	bool exploded;
 	int shieldLeft;
 	int shieldMax;
 	int hullLeft;
 	int hullMax;
-	T_SHIP *original;
-	T_PLAYER *owner;
+	T_SHIP* original;
+	T_PLAYER* owner;
 };
 
- struct T_ROUND {
+struct T_ROUND {
 	long attackShots;
 	long attackDamage;
 	long attackAbsorbed;
@@ -39,76 +40,76 @@ class T_UNIT {
 	long defendDamage;
 	long defendAbsorbed;
 
-	T_PLAYER *thisRoundData[2];
-	int **shiplist[2];
+	T_PLAYER* thisRoundData[2];
+	int** shiplist[2];
 };
 
 class RNG
 {
-	private:
-    SpeedRand _sr;
-	
-	public:
+private:
+	SpeedRand _sr;
+
+public:
 	RNG();
 
 	bool chanceDecide(int chance);
 
 	bool chanceDecide(int chance, bool toPerMille);
-	
+
 	int getRandom(int a, int b);
-    
-    unsigned long RandomNumber(unsigned long Max);
+
+	unsigned long RandomNumber(unsigned long Max);
 };
 class CombatSys
 {
-	private:
-		T_SHIP		* _SHIPS;
-		T_PLAYER	*_PLAYERS[2];
-		T_UNIT		*_UNITS[2];
-		int			unitCount;	
-		int			unitsSet;
-		int			allShipCount[2]; //for allocating memory
-		int			allPlayersCount[2];
-		RNG			_RNG;
-		int			roundCount;
-		T_ROUND		_ROUNDS[6];
-		int 		_VERSION;
-		bool 		_CAN_BATTLE;
-		bool 		_CAN_GET_RESULT;
-        bool        _SHOOT_AGAINST_EXPLODED;
-        bool        _ENABLE_RAPID_FIRE;
-	public:
-		CombatSys();
+private:
+	T_SHIP* _SHIPS;
+	T_PLAYER* _PLAYERS[2];
+	T_UNIT* _UNITS[2];
+	int			unitCount;
+	int			unitsSet;
+	int			allShipCount[2]; //for allocating memory
+	int			allPlayersCount[2];
+	RNG			_RNG;
+	int			roundCount;
+	T_ROUND		_ROUNDS[6];
+	int 		_VERSION;
+	bool 		_CAN_BATTLE;
+	bool 		_CAN_GET_RESULT;
+	bool        _SHOOT_AGAINST_EXPLODED;
+	bool        _ENABLE_RAPID_FIRE;
+public:
+	CombatSys();
 
-		int getVersion();
-        
-        void setShootAgainstExploded(bool modus);
-        
-        void setRapidfire(bool modus);
+	int getVersion();
 
-		void setUnitCount(int count);
+	void setShootAgainstExploded(bool modus);
 
-		bool canSetShip(int id);
+	void setRapidfire(bool modus);
 
-		void configShip(int id, long attack, long hull, long shield, char *rapidfire);
+	void setUnitCount(int count);
 
-		bool allShipsConfigured();
-		
-		bool canSetAttacker(int id);
-		
-		void addAttacker(int id, int weapon, int shield, int armor);
+	bool canSetShip(int id);
 
-		bool canSetDefender(int id);
-		
-		void addDefender(int id, int weapon, int shield, int armor);
+	void configShip(int id, long attack, long hull, long shield, char* rapidfire);
 
-		void addShips(const unsigned fraction, int playerId, int shipId, int amount);
+	bool allShipsConfigured();
 
-		void UpdateFleets();
+	bool canSetAttacker(int id);
 
-		void Shoot(T_UNIT *source, T_UNIT *target, long *attackpower, long *absorbed, bool *nextshot);
+	void addAttacker(int id, int weapon, int shield, int armor);
 
-		void battle();
+	bool canSetDefender(int id);
 
-		char * getResult();
+	void addDefender(int id, int weapon, int shield, int armor);
+
+	void addShips(const unsigned fraction, int playerId, int shipId, int amount);
+
+	void UpdateFleets();
+
+	void Shoot(T_UNIT* source, T_UNIT* target, long* attackpower, long* absorbed, bool* nextshot);
+
+	void battle();
+
+	char* getResult();
 };

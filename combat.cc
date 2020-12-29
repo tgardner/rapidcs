@@ -32,43 +32,42 @@
 #include <math.h>
 #include <time.h>
 #include <iostream>
-#include <linux/types.h>
 #include "combat.h"
 
 RNG::RNG()
 {
-    this->_sr.InitRand();
+	this->_sr.InitRand();
 }
 
 bool RNG::chanceDecide(int chance, bool toPerMille)
 {
-    return toPerMille ? this->getRandom(0,999) < chance : getRandom(0,99) < chance;
+	return toPerMille ? this->getRandom(0, 999) < chance : getRandom(0, 99) < chance;
 }
 bool RNG::chanceDecide(int chance)
 {
-	return this->chanceDecide(chance,false);
+	return this->chanceDecide(chance, false);
 }
 int RNG::getRandom(int a, int b)
 {
-	if(a == b) return a;
+	if (a == b) return a;
 	//int randnum = rand() % 10000;
-    int randnum = this->_sr.RandomNumber(10000);
-	float zahl = a + (randnum/10000.0)*(b-a);
-	
-	int c = (int) zahl;
+	int randnum = this->_sr.RandomNumber(10000);
+	float zahl = a + (randnum / 10000.0) * (b - a);
+
+	int c = (int)zahl;
 	float d = zahl - c;
-	if(d > 0.5) c++;
+	if (d > 0.5) c++;
 
 	return a == b && a == 0 ? 0 : c;
 }
 unsigned long RNG::RandomNumber(unsigned long Max)
 {
-    return this->_sr.RandomNumber(Max);
+	return this->_sr.RandomNumber(Max);
 }
 CombatSys::CombatSys()
 {
-	this->_PLAYERS[T_ATTACKER] = (T_PLAYER*) malloc(MAX_SLOTS * sizeof(T_PLAYER));
-	this->_PLAYERS[T_DEFENDER] = (T_PLAYER*) malloc(MAX_SLOTS * sizeof(T_PLAYER));
+	this->_PLAYERS[T_ATTACKER] = (T_PLAYER*)malloc(MAX_SLOTS * sizeof(T_PLAYER));
+	this->_PLAYERS[T_DEFENDER] = (T_PLAYER*)malloc(MAX_SLOTS * sizeof(T_PLAYER));
 
 	this->allShipCount[T_ATTACKER] = 0;
 	this->allShipCount[T_DEFENDER] = 0;
@@ -80,8 +79,8 @@ CombatSys::CombatSys()
 	this->_CAN_BATTLE = false;
 	this->_CAN_GET_RESULT = false;
 	this->unitsSet = 0;
-    this->_SHOOT_AGAINST_EXPLODED = false;
-    this->_ENABLE_RAPID_FIRE = true;
+	this->_SHOOT_AGAINST_EXPLODED = false;
+	this->_ENABLE_RAPID_FIRE = true;
 }
 
 int CombatSys::getVersion()
@@ -91,44 +90,44 @@ int CombatSys::getVersion()
 
 void CombatSys::setShootAgainstExploded(bool modus)
 {
-    this->_SHOOT_AGAINST_EXPLODED = modus;   
+	this->_SHOOT_AGAINST_EXPLODED = modus;
 }
 
 void CombatSys::setRapidfire(bool modus)
 {
-    this->_ENABLE_RAPID_FIRE = modus;   
+	this->_ENABLE_RAPID_FIRE = modus;
 }
 
 void CombatSys::setUnitCount(int count)
 {
-	this->_SHIPS = (T_SHIP *) malloc(count * sizeof(T_SHIP));
+	this->_SHIPS = (T_SHIP*)malloc(count * sizeof(T_SHIP));
 	this->unitCount = count;
 }
 bool CombatSys::canSetShip(int id)
 {
 	return id > -1 && id < this->unitCount;
 }
-void CombatSys::configShip(int id, long attack, long hull, long shield, char *rapidfire)
+void CombatSys::configShip(int id, long attack, long hull, long shield, char* rapidfire)
 {
-	int *list = (int *) malloc(this->unitCount * sizeof(int));
+	int* list = (int*)malloc(this->unitCount * sizeof(int));
 	int rfPercentage;
 	//begins with no rf
-	memset(list,0,this->unitCount * sizeof(int));
-	
+	memset(list, 0, this->unitCount * sizeof(int));
+
 	int toid = -1;
-		
+
 	//now we get the rapidfire as id1:rf1;id2:rf2;....;idN:rfN;
-	char	* nextShip,
-			* tmp;
-	tmp = (char*) malloc(strlen(rapidfire) * 2 *sizeof(char));
-	strcpy(tmp,rapidfire);
-	nextShip = (char*) malloc(10*sizeof(char));
-	nextShip = strtok(tmp,":;");
-	while(nextShip != NULL)
+	char* nextShip,
+		* tmp;
+	tmp = (char*)malloc(strlen(rapidfire) * 2 * sizeof(char));
+	strcpy(tmp, rapidfire);
+	nextShip = (char*)malloc(10 * sizeof(char));
+	nextShip = strtok(tmp, ":;");
+	while (nextShip != NULL)
 	{
-		if(strlen(nextShip) > 0)
+		if (strlen(nextShip) > 0)
 		{
-			if(toid == -1)
+			if (toid == -1)
 				toid = atoi(nextShip);
 			else
 			{
@@ -139,12 +138,12 @@ void CombatSys::configShip(int id, long attack, long hull, long shield, char *ra
 				list[toid] = rfPercentage;
 				toid = -1;
 			}
-			
+
 		}
-		nextShip = strtok(NULL,":;");
+		nextShip = strtok(NULL, ":;");
 	}
 
-	T_SHIP thisShip = {id,attack,hull,shield,list};
+	T_SHIP thisShip = { id,attack,hull,shield,list };
 
 	this->_SHIPS[id] = thisShip;
 	this->unitsSet++;
@@ -156,31 +155,31 @@ bool CombatSys::allShipsConfigured()
 }
 bool CombatSys::canSetAttacker(int id)
 {
-	return id > -1 && id < 	this->allPlayersCount[T_ATTACKER]+1;
+	return id > -1 && id < this->allPlayersCount[T_ATTACKER] + 1;
 }
 void CombatSys::addAttacker(int id, int weapon, int shield, int armor)
 {
-	int * emptyShipList = (int*) malloc(this->unitCount * sizeof(int));
-	memset(emptyShipList,0,this->unitCount * sizeof(int));
+	int* emptyShipList = (int*)malloc(this->unitCount * sizeof(int));
+	memset(emptyShipList, 0, this->unitCount * sizeof(int));
 
 
-	T_PLAYER thisPlayer = {id,weapon,shield,armor,emptyShipList};
+	T_PLAYER thisPlayer = { id,weapon,shield,armor,emptyShipList };
 	this->_PLAYERS[T_ATTACKER][id] = thisPlayer;
 	this->allPlayersCount[T_ATTACKER]++;
 }
 
 bool CombatSys::canSetDefender(int id)
 {
-	return id > -1 && id < 	this->allPlayersCount[T_DEFENDER]+1;
+	return id > -1 && id < this->allPlayersCount[T_DEFENDER] + 1;
 }
 void CombatSys::addDefender(int id, int weapon, int shield, int armor)
 {
-	int * emptyShipList = (int*) malloc(this->unitCount * sizeof(int));
-	memset(emptyShipList,0,this->unitCount * sizeof(int));
+	int* emptyShipList = (int*)malloc(this->unitCount * sizeof(int));
+	memset(emptyShipList, 0, this->unitCount * sizeof(int));
 
 
 
-	T_PLAYER thisPlayer = {id,weapon,shield,armor,emptyShipList};
+	T_PLAYER thisPlayer = { id,weapon,shield,armor,emptyShipList };
 	this->_PLAYERS[T_DEFENDER][id] = thisPlayer;
 	this->allPlayersCount[T_DEFENDER]++;
 }
@@ -197,23 +196,23 @@ void CombatSys::addShips(const unsigned fraction, int playerId, int shipId, int 
 
 void CombatSys::battle()
 {
-	if(!this->_CAN_BATTLE) return;
-	int			shipCount=0;
+	if (!this->_CAN_BATTLE) return;
+	int			shipCount = 0;
 
-	if(this->allShipCount[T_ATTACKER] == 0 || this->allShipCount[T_DEFENDER] == 0)
+	if (this->allShipCount[T_ATTACKER] == 0 || this->allShipCount[T_DEFENDER] == 0)
 	{
 		this->_CAN_GET_RESULT = true;
 		return;
 	}
 	//all the attackers
-	this->_UNITS[T_ATTACKER] = (T_UNIT *) malloc(this->allShipCount[T_ATTACKER] * sizeof(T_UNIT));
-	for(int i = 0; i<this->allPlayersCount[T_ATTACKER];i++)
+	this->_UNITS[T_ATTACKER] = (T_UNIT*)malloc(this->allShipCount[T_ATTACKER] * sizeof(T_UNIT));
+	for (int i = 0; i < this->allPlayersCount[T_ATTACKER]; i++)
 	{
-		for(int j=0;j<this->unitCount;j++)
+		for (int j = 0; j < this->unitCount; j++)
 		{
-			if(this->_PLAYERS[T_ATTACKER][i].shipList[j] > 0)
+			if (this->_PLAYERS[T_ATTACKER][i].shipList[j] > 0)
 			{
-				for(int k = 0;k<this->_PLAYERS[T_ATTACKER][i].shipList[j];k++)
+				for (int k = 0; k < this->_PLAYERS[T_ATTACKER][i].shipList[j]; k++)
 				{
 					T_UNIT unit = {
 										false,
@@ -232,14 +231,14 @@ void CombatSys::battle()
 
 	shipCount = 0;
 	//same for defenders
-	this->_UNITS[T_DEFENDER] = (T_UNIT *) malloc(this->allShipCount[T_DEFENDER] * sizeof(T_UNIT));
-	for(int i = 0; i<this->allPlayersCount[T_DEFENDER];i++)
+	this->_UNITS[T_DEFENDER] = (T_UNIT*)malloc(this->allShipCount[T_DEFENDER] * sizeof(T_UNIT));
+	for (int i = 0; i < this->allPlayersCount[T_DEFENDER]; i++)
 	{
-		for(int j=0;j<this->unitCount;j++)
+		for (int j = 0; j < this->unitCount; j++)
 		{
-			if(this->_PLAYERS[T_DEFENDER][i].shipList[j] > 0)
+			if (this->_PLAYERS[T_DEFENDER][i].shipList[j] > 0)
 			{
-				for(int k = 0;k<this->_PLAYERS[T_DEFENDER][i].shipList[j];k++)
+				for (int k = 0; k < this->_PLAYERS[T_DEFENDER][i].shipList[j]; k++)
 				{
 					T_UNIT unit = {
 										false,
@@ -259,7 +258,7 @@ void CombatSys::battle()
 	int round;
 
 	//main battle
-	for(round = 0;round<6;round++)
+	for (round = 0; round < 6; round++)
 	{
 		this->roundCount++;
 		//define the round data collector
@@ -272,28 +271,28 @@ void CombatSys::battle()
 		thisRound->defendShots = 0;
 		thisRound->defendDamage = 0;
 		thisRound->defendAbsorbed = 0;
-		
+
 		bool	shooting;
-        int explodedUnits[2];
-        explodedUnits[T_ATTACKER] = 0;
-        explodedUnits[T_DEFENDER] = 0;
+		int explodedUnits[2];
+		explodedUnits[T_ATTACKER] = 0;
+		explodedUnits[T_DEFENDER] = 0;
 
 		//attacker vs. defender
-		for(int a = 0; a<this->allShipCount[T_ATTACKER];a++)
+		for (int a = 0; a < this->allShipCount[T_ATTACKER]; a++)
 		{
-			if(explodedUnits[T_DEFENDER] == this->allShipCount[T_DEFENDER])
+			if (explodedUnits[T_DEFENDER] == this->allShipCount[T_DEFENDER])
 				break;
 			do
 			{
 				thisRound->attackShots++;
-				if(explodedUnits[T_DEFENDER] == this->allShipCount[T_DEFENDER])
+				if (explodedUnits[T_DEFENDER] == this->allShipCount[T_DEFENDER])
 					break;
-				
-				int vs = this->_SHOOT_AGAINST_EXPLODED ? this->_RNG.RandomNumber(this->allShipCount[T_DEFENDER]) : this->_RNG.getRandom(explodedUnits[T_DEFENDER],this->allShipCount[T_DEFENDER] - 1);
 
-				if(!this->_UNITS[T_DEFENDER][vs].exploded || this->_SHOOT_AGAINST_EXPLODED)
+				int vs = this->_SHOOT_AGAINST_EXPLODED ? this->_RNG.RandomNumber(this->allShipCount[T_DEFENDER]) : this->_RNG.getRandom(explodedUnits[T_DEFENDER], this->allShipCount[T_DEFENDER] - 1);
+
+				if (!this->_UNITS[T_DEFENDER][vs].exploded || this->_SHOOT_AGAINST_EXPLODED)
 				{
-					this->Shoot(&this->_UNITS[T_ATTACKER][a], &this->_UNITS[T_DEFENDER][vs], &thisRound->attackDamage,&thisRound->defendAbsorbed,&shooting);
+					this->Shoot(&this->_UNITS[T_ATTACKER][a], &this->_UNITS[T_DEFENDER][vs], &thisRound->attackDamage, &thisRound->defendAbsorbed, &shooting);
 				}
 				else
 				{
@@ -301,53 +300,51 @@ void CombatSys::battle()
 				}
 				//printf("a(%i): %i(%i) vs %i(%i), exploded:%i\n",round,this->_UNITS[T_ATTACKER][a].original->id,a,this->_UNITS[T_DEFENDER][vs].original->id,vs,this->_UNITS[T_DEFENDER][vs].exploded);
 
-                
-                if(this->_UNITS[T_DEFENDER][vs].exploded && !this->_SHOOT_AGAINST_EXPLODED)
-                {
+
+				if (this->_UNITS[T_DEFENDER][vs].exploded && !this->_SHOOT_AGAINST_EXPLODED)
+				{
 					explodedUnits[T_DEFENDER];
 					//if(explodedUnits[T_DEFENDER] < this->allShipCount[T_DEFENDER])
 					{
-						if(explodedUnits[T_DEFENDER] != vs)
-							std::swap(this->_UNITS[T_DEFENDER][explodedUnits[T_DEFENDER]],this->_UNITS[T_DEFENDER][vs]);
+						if (explodedUnits[T_DEFENDER] != vs)
+							std::swap(this->_UNITS[T_DEFENDER][explodedUnits[T_DEFENDER]], this->_UNITS[T_DEFENDER][vs]);
 						explodedUnits[T_DEFENDER]++;
 					}
-                }
-                
+				}
 
-			}
-			while(shooting);
+
+			} while (shooting);
 		}
 		//defender vs. attacker
-		for(int d = 0; d<this->allShipCount[T_DEFENDER];d++)
+		for (int d = 0; d < this->allShipCount[T_DEFENDER]; d++)
 		{
-			if(explodedUnits[T_ATTACKER] == this->allShipCount[T_ATTACKER])
+			if (explodedUnits[T_ATTACKER] == this->allShipCount[T_ATTACKER])
 				break;
 			do
 			{
-				if(explodedUnits[T_ATTACKER] == this->allShipCount[T_ATTACKER])
+				if (explodedUnits[T_ATTACKER] == this->allShipCount[T_ATTACKER])
 					break;
-				
-				thisRound->defendShots++;
-				int vs = this->_SHOOT_AGAINST_EXPLODED ? this->_RNG.RandomNumber(this->allShipCount[T_ATTACKER]) : this->_RNG.getRandom(explodedUnits[T_ATTACKER],this->allShipCount[T_ATTACKER] - 1);
 
-				if(!this->_UNITS[T_ATTACKER][vs].exploded || this->_SHOOT_AGAINST_EXPLODED)
+				thisRound->defendShots++;
+				int vs = this->_SHOOT_AGAINST_EXPLODED ? this->_RNG.RandomNumber(this->allShipCount[T_ATTACKER]) : this->_RNG.getRandom(explodedUnits[T_ATTACKER], this->allShipCount[T_ATTACKER] - 1);
+
+				if (!this->_UNITS[T_ATTACKER][vs].exploded || this->_SHOOT_AGAINST_EXPLODED)
 					this->Shoot(&this->_UNITS[T_DEFENDER][d], &this->_UNITS[T_ATTACKER][vs], &thisRound->defendDamage, &thisRound->attackAbsorbed, &shooting);
 				else
 					shooting = false;
 				//printf("d(%i): %i(%i) vs %i(%i), exploded:%i\n",round,this->_UNITS[T_DEFENDER][d].original->id,d,this->_UNITS[T_ATTACKER][vs].original->id,vs,this->_UNITS[T_ATTACKER][vs].exploded);
-				
-                
-                if(this->_UNITS[T_ATTACKER][vs].exploded && !this->_SHOOT_AGAINST_EXPLODED)
-                {
+
+
+				if (this->_UNITS[T_ATTACKER][vs].exploded && !this->_SHOOT_AGAINST_EXPLODED)
+				{
 					//if(explodedUnits[T_DEFENDER] < this->allShipCount[T_DEFENDER])
 					{
-						if(explodedUnits[T_ATTACKER] != vs)
-							std::swap(this->_UNITS[T_ATTACKER][explodedUnits[T_ATTACKER]],this->_UNITS[T_ATTACKER][vs]);
+						if (explodedUnits[T_ATTACKER] != vs)
+							std::swap(this->_UNITS[T_ATTACKER][explodedUnits[T_ATTACKER]], this->_UNITS[T_ATTACKER][vs]);
 						explodedUnits[T_ATTACKER]++;
 					}
-                }
-			}
-			while(shooting);
+				}
+			} while (shooting);
 		}
 
 		//updating fleet, maybe quit the fight
@@ -355,33 +352,33 @@ void CombatSys::battle()
 		//printf("for round %i\n",round);
 		this->UpdateFleets();
 
-		
+
 		thisRound->shiplist[T_ATTACKER] = (int**)malloc(this->allPlayersCount[T_ATTACKER] * sizeof(int*));
-		for(int player = 0; player < this->allPlayersCount[T_ATTACKER];player++)
+		for (int player = 0; player < this->allPlayersCount[T_ATTACKER]; player++)
 		{
 			thisRound->shiplist[T_ATTACKER][player] = (int*)malloc(this->unitCount * sizeof(int));
-			memset(thisRound->shiplist[T_ATTACKER][player],0,this->unitCount * sizeof(int));
+			memset(thisRound->shiplist[T_ATTACKER][player], 0, this->unitCount * sizeof(int));
 
-			for(int unit = 0; unit < this->unitCount;unit++)
-				
+			for (int unit = 0; unit < this->unitCount; unit++)
+
 				thisRound->shiplist[T_ATTACKER][player][unit] = this->_PLAYERS[T_ATTACKER][player].shipList[unit];
 		}
 
 		thisRound->shiplist[T_DEFENDER] = (int**)malloc(this->allPlayersCount[T_DEFENDER] * sizeof(int*));
-		for(int player = 0; player < this->allPlayersCount[T_DEFENDER];player++)
+		for (int player = 0; player < this->allPlayersCount[T_DEFENDER]; player++)
 		{
 			thisRound->shiplist[T_DEFENDER][player] = (int*)malloc(this->unitCount * sizeof(int));
-			memset(thisRound->shiplist[T_DEFENDER][player],0,this->unitCount * sizeof(int));
+			memset(thisRound->shiplist[T_DEFENDER][player], 0, this->unitCount * sizeof(int));
 
-			for(int unit = 0; unit < this->unitCount;unit++)
+			for (int unit = 0; unit < this->unitCount; unit++)
 				thisRound->shiplist[T_DEFENDER][player][unit] = this->_PLAYERS[T_DEFENDER][player].shipList[unit];
 		}
-		
 
 
-		
+
+
 		//game over
-		if(this->allShipCount[T_ATTACKER] == 0 || this->allShipCount[T_DEFENDER] == 0)
+		if (this->allShipCount[T_ATTACKER] == 0 || this->allShipCount[T_DEFENDER] == 0)
 		{
 			//free(this->_UNITS);
 			break;
@@ -395,27 +392,27 @@ void CombatSys::battle()
 void CombatSys::UpdateFleets()
 {
 	//Clear Exploded
-	T_UNIT *newUnit, *src;
+	T_UNIT* newUnit, * src;
 	int cnt;
 	int shipCount;
-	
-	
+
+
 	bool isexploded;
-	
-	
-	cnt= 0;
+
+
+	cnt = 0;
 	src = this->_UNITS[T_ATTACKER];
-	newUnit = (T_UNIT *) malloc(this->allShipCount[T_ATTACKER] * sizeof(T_UNIT));
+	newUnit = (T_UNIT*)malloc(this->allShipCount[T_ATTACKER] * sizeof(T_UNIT));
 	shipCount = this->allShipCount[T_ATTACKER];
-	
-	for(int i=0;i<shipCount;i++)
+
+	for (int i = 0; i < shipCount; i++)
 	{
-		
+
 		isexploded = src[i].exploded;
-		if(!isexploded)
+		if (!isexploded)
 		{
 			this->_UNITS[T_ATTACKER][i].shieldLeft = this->_UNITS[T_ATTACKER][i].shieldMax;
-			
+
 			T_UNIT unit = {
 				false,
 				this->_UNITS[T_ATTACKER][i].shieldMax,
@@ -425,9 +422,9 @@ void CombatSys::UpdateFleets()
 				this->_UNITS[T_ATTACKER][i].original,
 				this->_UNITS[T_ATTACKER][i].owner,
 			};
-			
+
 			newUnit[cnt++] = unit;
-			
+
 		}
 		else
 		{
@@ -438,15 +435,15 @@ void CombatSys::UpdateFleets()
 	free(this->_UNITS[T_ATTACKER]);
 	this->_UNITS[T_ATTACKER] = newUnit;
 
-	cnt= 0;
-	newUnit = (T_UNIT *) malloc(this->allShipCount[T_DEFENDER] * sizeof(T_UNIT));
+	cnt = 0;
+	newUnit = (T_UNIT*)malloc(this->allShipCount[T_DEFENDER] * sizeof(T_UNIT));
 	shipCount = this->allShipCount[T_DEFENDER];
-	for(int i=0;i<shipCount;i++)
+	for (int i = 0; i < shipCount; i++)
 	{
-		if(!this->_UNITS[T_DEFENDER][i].exploded)
+		if (!this->_UNITS[T_DEFENDER][i].exploded)
 		{
-			
-			
+
+
 			T_UNIT unit = {
 				false,
 				this->_UNITS[T_DEFENDER][i].shieldMax,
@@ -456,7 +453,7 @@ void CombatSys::UpdateFleets()
 				this->_UNITS[T_DEFENDER][i].original,
 				this->_UNITS[T_DEFENDER][i].owner,
 			};
-			
+
 			newUnit[cnt++] = unit;
 		}
 		else
@@ -469,39 +466,39 @@ void CombatSys::UpdateFleets()
 	this->_UNITS[T_DEFENDER] = newUnit;
 };
 
-void CombatSys::Shoot(T_UNIT *source, T_UNIT *target, long *attackpower, long *absorbed, bool *nextshot)
+void CombatSys::Shoot(T_UNIT* source, T_UNIT* target, long* attackpower, long* absorbed, bool* nextshot)
 {
 	long		attack,
-				shields,
-				hull;
+		shields,
+		hull;
 
 	float		dmgPrcnt;
 
 	attack = source->original->attack * (1 + (float)(source->owner->techWeapon / 10.0f));
 	shields = target->shieldLeft;
 	hull = target->hullLeft;
-    
-    *attackpower += attack;
-    //lets try it speedsim like
-    double Dam = (double)attack;
-    double Dam2 = Dam;
-    
-    double maxShield = (double)(target->shieldMax);
-    if(Dam < target->shieldLeft)
-    {
-        // round damage down to full percents
-        double perc = floor(100.0f * Dam / maxShield);
-        Dam = maxShield * perc;
-        Dam /= 100.0f;
-        
-        Dam2 = Dam;
-    }
-    if(target->shieldLeft <= 0 || Dam > 0)
+
+	*attackpower += attack;
+	//lets try it speedsim like
+	double Dam = (double)attack;
+	double Dam2 = Dam;
+
+	double maxShield = (double)(target->shieldMax);
+	if (Dam < target->shieldLeft)
 	{
-        // reduce shield by damage
+		// round damage down to full percents
+		double perc = floor(100.0f * Dam / maxShield);
+		Dam = maxShield * perc;
+		Dam /= 100.0f;
+
+		Dam2 = Dam;
+	}
+	if (target->shieldLeft <= 0 || Dam > 0)
+	{
+		// reduce shield by damage
 		Dam -= target->shieldLeft;
 		target->shieldLeft -= Dam2;
-		if(Dam < 0)
+		if (Dam < 0)
 			Dam = 0;
 	}
 	else
@@ -509,21 +506,21 @@ void CombatSys::Shoot(T_UNIT *source, T_UNIT *target, long *attackpower, long *a
 		Dam = 0;
 	}
 	*absorbed += (attack - Dam);
-    
-    if(target->shieldLeft < 0)
+
+	if (target->shieldLeft < 0)
 		target->shieldLeft = 0;
-	if(Dam > 0)
+	if (Dam > 0)
 	{
-        // if damage left, destroy hull
+		// if damage left, destroy hull
 		target->hullLeft -= Dam;
-		if(target->hullLeft < 0)
+		if (target->hullLeft < 0)
 			target->hullLeft = 0;
 	}
-    /*
+	/*
 	//the 1%-rule
 	if(target->shieldLeft == 0 || (float)(attack / (float)(target->shieldMax) > 0.01))
 	{
-		
+
 		//first the shields
 		if(attack < shields)
 		{
@@ -534,50 +531,50 @@ void CombatSys::Shoot(T_UNIT *source, T_UNIT *target, long *attackpower, long *a
 		else
 		{
 			attack -= target->shieldLeft;
-			
+
 			*absorbed += target->shieldLeft;
 			target->shieldLeft = 0; //shieldsbroken
-			
+
 
 			target->hullLeft -= attack;
 
-			
+
 		}
 	}
-    */
-    dmgPrcnt = (float)((1 - target->hullLeft / (float)(target->hullMax))) * 100;
-	if(dmgPrcnt > 30)
+	*/
+	dmgPrcnt = (float)((1 - target->hullLeft / (float)(target->hullMax))) * 100;
+	if (dmgPrcnt > 30)
 	{
 		//target->exploded = true;
 		target->exploded = this->_RNG.chanceDecide((int)(dmgPrcnt));
 	}
 	//rapidfire
-    if(this->_ENABLE_RAPID_FIRE)
-    {
-    	int rf = source->original->rapidfire[target->original->id];
-    	if(rf > 0)
-    		*nextshot = this->_RNG.chanceDecide(rf,true);
-    	else 
-    		*nextshot = false;
-    }
-    else
-        *nextshot = false;
+	if (this->_ENABLE_RAPID_FIRE)
+	{
+		int rf = source->original->rapidfire[target->original->id];
+		if (rf > 0)
+			*nextshot = this->_RNG.chanceDecide(rf, true);
+		else
+			*nextshot = false;
+	}
+	else
+		*nextshot = false;
 }
 
-char * CombatSys::getResult()
+char* CombatSys::getResult()
 {
-	if(!this->_CAN_GET_RESULT)
-		return "{\"error\":1}";
+	if (!this->_CAN_GET_RESULT)
+		return (char*)"{\"error\":1}";
 	//pointer test
 	//free(this->_UNITS);
 	//free(this->_PLAYERS);
 	//TODO: aproximate txt
-	char	*txt,
-			*tmp	
+	char* txt,
+		* tmp
 		;
-	
-	txt = (char *)malloc(30000 * sizeof(char));
-	tmp = (char *)malloc(30000 * sizeof(char));
+
+	txt = (char*)malloc(30000 * sizeof(char));
+	tmp = (char*)malloc(30000 * sizeof(char));
 	/* Format example
 	{"rounds" :
 	[
@@ -593,89 +590,89 @@ char * CombatSys::getResult()
 	}
 	*/
 
-	strcpy(txt,"{\"rounds\" : [\n");
+	strcpy(txt, "{\"rounds\" : [\n");
 
-	if(this->roundCount == 0)
+	if (this->roundCount == 0)
 	{
 		strcat(txt, "]}");
 		return txt;
 	}
-	
-	for(int round = 0; round<this->roundCount;round++)
+
+	for (int round = 0; round < this->roundCount; round++)
 	{
-		strcat(txt,"	{\n");
-		sprintf(tmp,"		\"ashot\":%i,\n		\"adamage\":%i,\n		\"aabsorbed\":%i,\n		\"dshot\":%i,\n		\"ddamage\":%i,\n		\"dabsorbed\":%i,\n		"
-			,this->_ROUNDS[round].attackShots
-			,this->_ROUNDS[round].attackDamage
-			,this->_ROUNDS[round].attackAbsorbed
-			,this->_ROUNDS[round].defendShots
-			,this->_ROUNDS[round].defendDamage
-			,this->_ROUNDS[round].defendAbsorbed
+		strcat(txt, "	{\n");
+		sprintf(tmp, "		\"ashot\":%i,\n		\"adamage\":%i,\n		\"aabsorbed\":%i,\n		\"dshot\":%i,\n		\"ddamage\":%i,\n		\"dabsorbed\":%i,\n		"
+			, this->_ROUNDS[round].attackShots
+			, this->_ROUNDS[round].attackDamage
+			, this->_ROUNDS[round].attackAbsorbed
+			, this->_ROUNDS[round].defendShots
+			, this->_ROUNDS[round].defendDamage
+			, this->_ROUNDS[round].defendAbsorbed
 		);
-		strcat(txt,tmp);
+		strcat(txt, tmp);
 
 
 		//units
-		strcat(txt,"\"aunits\":");
-		strcat(txt,"\n			[");
-		for(int j = 0; j<this->allPlayersCount[T_ATTACKER];j++)
+		strcat(txt, "\"aunits\":");
+		strcat(txt, "\n			[");
+		for (int j = 0; j < this->allPlayersCount[T_ATTACKER]; j++)
 		{
 
-			strcat(txt,"\n				{");
-            int cnt = 0;
-			for(int k = 0;k<this->unitCount;k++)
+			strcat(txt, "\n				{");
+			int cnt = 0;
+			for (int k = 0; k < this->unitCount; k++)
 			{
-				if(this->_ROUNDS[round].shiplist[T_ATTACKER][j][k] > 0)
+				if (this->_ROUNDS[round].shiplist[T_ATTACKER][j][k] > 0)
 				{
-					if(cnt > 0)
-						strcat(txt,",");
-					sprintf(tmp,"\n				\"%i\" : %i",k,this->_ROUNDS[round].shiplist[T_ATTACKER][j][k]);
-					strcat(txt,tmp);
+					if (cnt > 0)
+						strcat(txt, ",");
+					sprintf(tmp, "\n				\"%i\" : %i", k, this->_ROUNDS[round].shiplist[T_ATTACKER][j][k]);
+					strcat(txt, tmp);
 					cnt++;
 				}
 
 			}
-			strcat(txt,"\n				}");
-			if(j < (this->allPlayersCount[T_ATTACKER] - 1))
-				strcat(txt,",");
+			strcat(txt, "\n				}");
+			if (j < (this->allPlayersCount[T_ATTACKER] - 1))
+				strcat(txt, ",");
 		}
-		strcat(txt,"\n			],\n		");
+		strcat(txt, "\n			],\n		");
 
-		strcat(txt,"\"dunits\":");
-		strcat(txt,"\n			[");
-		for(int j = 0; j<this->allPlayersCount[T_DEFENDER];j++)
+		strcat(txt, "\"dunits\":");
+		strcat(txt, "\n			[");
+		for (int j = 0; j < this->allPlayersCount[T_DEFENDER]; j++)
 		{
-			
-			strcat(txt,"\n				{");
-            int cnt = 0;
-			for(int k = 0;k<this->unitCount;k++)
+
+			strcat(txt, "\n				{");
+			int cnt = 0;
+			for (int k = 0; k < this->unitCount; k++)
 			{
-				if(this->_ROUNDS[round].shiplist[T_DEFENDER][j][k] > 0)
+				if (this->_ROUNDS[round].shiplist[T_DEFENDER][j][k] > 0)
 				{
-					if(cnt > 0)
-						strcat(txt,",");
-					sprintf(tmp,"\n				\"%i\" : %i",k,this->_ROUNDS[round].shiplist[T_DEFENDER][j][k]);
-					strcat(txt,tmp);
+					if (cnt > 0)
+						strcat(txt, ",");
+					sprintf(tmp, "\n				\"%i\" : %i", k, this->_ROUNDS[round].shiplist[T_DEFENDER][j][k]);
+					strcat(txt, tmp);
 					cnt++;
 				}
 
 			}
-			strcat(txt,"\n				}");
-			if(j < (this->allPlayersCount[T_DEFENDER] - 1))
-				strcat(txt,",");
+			strcat(txt, "\n				}");
+			if (j < (this->allPlayersCount[T_DEFENDER] - 1))
+				strcat(txt, ",");
 		}
-		strcat(txt,"\n			]");
-		
-		
+		strcat(txt, "\n			]");
 
 
-		strcat(txt,"\n	}");
-		if(round < (this->roundCount - 1))
-			strcat(txt,",");		
-		strcat(txt,"\n");
+
+
+		strcat(txt, "\n	}");
+		if (round < (this->roundCount - 1))
+			strcat(txt, ",");
+		strcat(txt, "\n");
 	}
-	strcat(txt,"]\n");
-	strcat(txt,"}");
+	strcat(txt, "]\n");
+	strcat(txt, "}");
 
 	return txt;
 }

@@ -1,4 +1,5 @@
 #include "speedrand.h"
+#include <time.h>
 
 unsigned long randbuf[17][2];
 int p1, p2;

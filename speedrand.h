@@ -1,4 +1,5 @@
 inline unsigned long _lrotl(unsigned long value, int shift);
+
 class SpeedRand
 {
     public:
